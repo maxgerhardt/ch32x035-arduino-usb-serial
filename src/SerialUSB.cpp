@@ -44,13 +44,16 @@ void SerialUSBBase::maintain() {
 
 extern uint8_t  UART2_Rx_Buf[DEF_UARTx_RX_BUF_LEN];
 size_t SerialUSBBase::write(const uint8_t *buffer, size_t size) {
-    // wait for all previous RX to go through
-    while(Uart.Rx_RemainLen != 0) {
-        this->maintain();
+    size_t remaining_buf = DEF_UARTx_RX_BUF_LEN - Uart.Rx_RemainLen;
+    if (remaining_buf < size) {
+        /* FAIL */
+        return 0;
     }
-    Uart.Rx_RemainLen = size;
-    memcpy(UART2_Rx_Buf, buffer, size <= DEF_UARTx_RX_BUF_LEN ? size : DEF_UARTx_RX_BUF_LEN);
-    Uart.Rx_DealPtr = 0;
+    if (Uart.Rx_RemainLen == 0) {
+        Uart.Rx_DealPtr = 0;
+    }
+    memcpy(UART2_Rx_Buf + Uart.Rx_DealPtr + Uart.Rx_RemainLen, buffer, size);
+    Uart.Rx_RemainLen += size;
     Uart.Rx_TimeOut = 0x00;
     return size;
 }

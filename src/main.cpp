@@ -5,6 +5,7 @@
 
 static unsigned long lastTime = 0;
 static uint8_t led = 0;
+static unsigned cnt = 0;
 
 void setup() {
     pinMode(LED, OUTPUT);
@@ -17,6 +18,8 @@ void loop() {
         digitalWrite(LED, led);
         lastTime = millis();
         SerialUSB.println("Hello from USB!");
+        SerialUSB.println("And line 2!");
+        SerialUSB.println("And count " + String(cnt++));
     }
     SerialUSB.maintain(); // hack for now, must be called as fast as possible
     // otherwise we're missing the 30us CDC packets that *we* must send 
